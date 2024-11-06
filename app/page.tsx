@@ -86,77 +86,95 @@ function DemoMeetingTab(props: { label: string }) {
 
 function CustomConnectionTab(props: { label: string }) {
   const router = useRouter();
-
   const [e2ee, setE2ee] = useState(false);
   const [sharedPassphrase, setSharedPassphrase] = useState(randomString(64));
+  const [meetings, setMeetings] = useState<string[]>([]);
 
   const onSubmit: React.FormEventHandler<HTMLFormElement> = (event) => {
     event.preventDefault();
     const formData = new FormData(event.target as HTMLFormElement);
     const serverUrl = formData.get('serverUrl');
     const token = formData.get('token');
+    const newMeetingId = generateRoomId(); // Générer un nouvel ID de room
+
+    // Ajouter le meeting à l'état
+    setMeetings((prev) => [...prev, newMeetingId]);
+
     if (e2ee) {
-      router.push(
-        `/custom/?liveKitUrl=${serverUrl}&token=${token}#${encodePassphrase(sharedPassphrase)}`,
-      );
+      router.push(`/custom/?liveKitUrl=${serverUrl}&token=${token}#${encodePassphrase(sharedPassphrase)}`);
     } else {
       router.push(`/custom/?liveKitUrl=${serverUrl}&token=${token}`);
     }
   };
-  return (
-    <form className={styles.tabContent} onSubmit={onSubmit}>
-      <p style={{ marginTop: 0 }}>
-        Connect LiveKit Meet with a custom server using LiveKit Cloud or LiveKit Server.
-      </p>
-      <input
-        id="serverUrl"
-        name="serverUrl"
-        type="url"
-        placeholder="LiveKit Server URL: wss://*.livekit.cloud"
-        required
-      />
-      <textarea
-        id="token"
-        name="token"
-        placeholder="Token"
-        required
-        rows={5}
-        style={{ padding: '1px 2px', fontSize: 'inherit', lineHeight: 'inherit' }}
-      />
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-        <div style={{ display: 'flex', flexDirection: 'row', gap: '1rem' }}>
-          <input
-            id="use-e2ee"
-            type="checkbox"
-            checked={e2ee}
-            onChange={(ev) => setE2ee(ev.target.checked)}
-          ></input>
-          <label htmlFor="use-e2ee">Enable end-to-end encryption</label>
-        </div>
-        {e2ee && (
-          <div style={{ display: 'flex', flexDirection: 'row', gap: '1rem' }}>
-            <label htmlFor="passphrase">Passphrase</label>
-            <input
-              id="passphrase"
-              type="password"
-              value={sharedPassphrase}
-              onChange={(ev) => setSharedPassphrase(ev.target.value)}
-            />
-          </div>
-        )}
-      </div>
 
-      <hr
-        style={{ width: '100%', borderColor: 'rgba(255, 255, 255, 0.15)', marginBlock: '1rem' }}
-      />
-      <button
-        style={{ paddingInline: '1.25rem', width: '100%' }}
-        className="lk-button"
-        type="submit"
-      >
-        Connect
-      </button>
-    </form>
+  return (
+    <div>
+      <form className={styles.tabContent} onSubmit={onSubmit}>
+        <p style={{ marginTop: 0 }}>
+          Connect LiveKit Meet with a custom server using LiveKit Cloud or LiveKit Server.
+        </p>
+        <input
+          id="serverUrl"
+          name="serverUrl"
+          type="url"
+          placeholder="LiveKit Server URL: wss://*.livekit.cloud"
+          required
+        />
+        <textarea
+          id="token"
+          name="token"
+          placeholder="Token"
+          required
+          rows={5}
+          style={{ padding: '1px 2px', fontSize: 'inherit', lineHeight: 'inherit' }}
+        />
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          <div style={{ display: 'flex', flexDirection: 'row', gap: '1rem' }}>
+            <input
+              id="use-e2ee"
+              type="checkbox"
+              checked={e2ee}
+              onChange={(ev) => setE2ee(ev.target.checked)}
+            ></input>
+            <label htmlFor="use-e2ee">Enable end-to-end encryption</label>
+          </div>
+          {e2ee && (
+            <div style={{ display: 'flex', flexDirection: 'row', gap: '1rem' }}>
+              <label htmlFor="passphrase">Passphrase</label>
+              <input
+                id="passphrase"
+                type="password"
+                value={sharedPassphrase}
+                onChange={(ev) => setSharedPassphrase(ev.target.value)}
+              />
+            </div>
+          )}
+        </div>
+
+        <hr
+          style={{ width: '100%', borderColor: 'rgba(255, 255, 255, 0.15)', marginBlock: '1rem' }}
+        />
+        <button
+          style={{ paddingInline: '1.25rem', width: '100%' }}
+          className="lk-button"
+          type="submit"
+        >
+          Connect
+        </button>
+      </form>
+
+      {/* Listing des meetings créés */}
+      <div className={styles.meetingList}>
+        <h3>Meetings créés :</h3>
+        <ul>
+          {meetings.map((meetingId, index) => (
+            <li key={index}>
+              <a href={`/rooms/${meetingId}`}>{meetingId}</a>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
   );
 }
 
