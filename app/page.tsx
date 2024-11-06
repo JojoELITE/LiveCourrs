@@ -95,9 +95,8 @@ function CustomConnectionTab(props: { label: string }) {
     const formData = new FormData(event.target as HTMLFormElement);
     const serverUrl = formData.get('serverUrl');
     const token = formData.get('token');
-    const newMeetingId = generateRoomId(); // Générer un nouvel ID de room
+    const newMeetingId = generateRoomId();
 
-    // Ajouter le meeting à l'état
     setMeetings((prev) => [...prev, newMeetingId]);
 
     if (e2ee) {
